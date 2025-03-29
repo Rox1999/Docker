@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  addressbook-app:
+    image: addressbook-app:latest
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://addressbook-db:3306/addressbook?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=addressuser
+      - SPRING_DATASOURCE_PASSWORD=secretpassword
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - addressbook-db
+    networks:
+      - addressbook-network
+
+  addressbook-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=addressbook
+      - MYSQL_USER=addressuser
+      - MYSQL_PASSWORD=secretpassword
+      - MYSQL_ROOT_PASSWORD=rootsecret
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - addressbook-network
+
+volumes:
+  mysql-data:
+
+networks:
+  addressbook-network:
+    driver: bridge
