@@ -48,17 +48,43 @@ echo \
 sudo apt-get update
 
 # Install Docker Engine
+echo "Installing Docker..."
+
+# Remove any old versions
+sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
+
+# Install required packages
+sudo apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+# Add Docker’s official GPG key
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Set up the Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update the package list to include Docker's repo
+sudo apt-get update
+
+# Install Docker Engine and CLI
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Enable and start Docker
+# Enable and start Docker service
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Add current user to the docker group
+# Add your user to the docker group (requires re-login)
 sudo usermod -aG docker $USER
 
-echo "Verifying Docker installation..."
-docker --version
+echo "Docker installed successfully. Run 'docker version' to verify."
+echo "You may need to log out and back in to use Docker without sudo."
 
-echo "All installations completed successfully!"
-echo "Note: You may need to log out and log back in for Docker group changes to take effect."
